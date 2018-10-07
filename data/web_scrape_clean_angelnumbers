@@ -7,7 +7,7 @@ cat index_urls | grep -i 'angel-number' > index_urls_filtered
 # Download each angel number url into its own html file for futher processing
 for i in $(cat index_urls_filtered); do wget -q ${i}; done
 # Parse out angel number data from individual angel-number-[N].html file
-< angel-number-2207.html scrape -b -e 'span[style]' | xml2json | jq -c '.html.body.span[]."$t"' | grep -v "null"
+< angel-number-2207.html scrape -b -e '//span[@style]/descendant::*/text()' | xml2json | jq -c '.html.body."$t"' | grep -v "null"
 # Transform each html file into the parsed angel number data and create a new file for it.
 # example - angel-number-111.html => angel-number-111
-for i in *.html; do cat ${i} | scrape -b -e 'span[style]' | xml2json | jq -c '.html.body.span[]."$t"' | grep -v "null" > ${i%.*}; done
+for i in *.html; do cat ${i} | scrape -b -e '//span[@style]/descendant::*/text()' | xml2json | jq -c '.html.body."$t"' | grep -v "null" > ${i%.*}; done
