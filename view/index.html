@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="wordcloud2.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script scr="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    </head>
+    <body>
+        <canvas id="my_canvas"></canvas>
+        <script type="text/javascript">
+            //  $(document).ready(function(){
+              /* JQUERY API CALL */
+              // $.getJSON("url-endpoint", function(result){
+                  //$.each(result, function(i, field){
+                      // do something with each item from the result
+                  //}) end foreach
+              //}) end api call
+          //})  end document ready
+              WordCloud(document.getElementById('my_canvas'), { list: [['foo', 12], ['bar', 50]] } );
+        </script>
+    </body>
+</html>

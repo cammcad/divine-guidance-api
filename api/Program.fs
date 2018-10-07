@@ -5,18 +5,18 @@ open agentlib
 open Api
 open Suave
 open Suave.Operators
+open Suave
 
 [<EntryPoint>]
 let main _argv =
     // startup processes
-    let counter = AngelNumberAgent()
-    counter.Increment(1)
-    counter.Increment(5)
+    let angelNumbers = AngelNumberAgent()
+    
     let app =
         choose
             [
                 Suave.Filters.path "/v1/healthcheck" >=> Suave.Filters.GET >=> Successful.OK ""
-                Suave.Filters.path "/v1/counter" >=> Suave.Filters.GET >=> Successful.OK (counter.Fetch() |> string)
+                Suave.Filters.pathScan "/v1/number/%d" (fun num -> Successful.OK ((angelNumbers.Fetch(num)) |> fun x -> String.Format("{0}",x.Info)))
                 RequestErrors.NOT_FOUND "Not Found"
             ] 
 

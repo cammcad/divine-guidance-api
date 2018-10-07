@@ -1,18 +1,21 @@
 namespace Api
 
+open LiteDB
 open agentlib.EAgent
 
 type AngelNumberAgent() =
     let counter = MailboxProcessor.SpawnAgent((fun msg n ->
                     match msg with
-                    | Increment m ->  
-                        let newState = n + m
-                        printfn " incrementing counter from %i to %i" n newState; newState
-                    | StopIPA -> raise(IPAStopException)
-                    | Fetch replyChannel ->
-                        do replyChannel.Reply(n)
+                    | Fetch(number,replyChannel) ->
+                        use db = new LiteDatabase(@"../data/AngelNumber.db")
+                        let numbers = db.GetCollection<AngelNumber>("numbers")
+                        let angelNumber = numbers.FindOne(fun x -> x.Number = number)
+                        do replyChannel.Reply(angelNumber)
                         n
-                  ), 0, errorHandler = (fun _ _ _ -> Continue(0)))
-    member self.Increment(n) = counter.Post(Increment(n))
-    member self.Stop() = counter.Post(StopIPA)
-    member self.Fetch() = counter.PostAndReply(fun replyChannel -> Fetch(replyChannel)) 
+                    | StopAngelNumberAgent -> raise(AngelNumberReqStopException)
+                  ), (AngelNumber()), errorHandler = (fun ex msg _ ->
+                                                         printfn "[Error] Agent-AngelNumber received msg: %A \n Exception: %A" msg ex
+                                                         match ex with
+                                                         | AngelNumberReqStopException -> TerminateProcess
+                                                         | _ -> Continue (AngelNumber())))
+    member self.Fetch(x) = counter.PostAndReply(fun replyChannel -> Fetch(x,replyChannel))
