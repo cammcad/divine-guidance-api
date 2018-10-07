@@ -4,7 +4,7 @@ open LiteDB
 open agentlib.EAgent
 
 type AngelNumberAgent() =
-    let counter = MailboxProcessor.SpawnAgent((fun msg n ->
+    let angelNumber = MailboxProcessor.SpawnAgent((fun msg n ->
                     match msg with
                     | Fetch(number,replyChannel) ->
                         use db = new LiteDatabase(@"../data/AngelNumber.db")
@@ -13,9 +13,9 @@ type AngelNumberAgent() =
                         do replyChannel.Reply(angelNumber)
                         n
                     | StopAngelNumberAgent -> raise(AngelNumberReqStopException)
-                  ), (AngelNumber()), errorHandler = (fun ex msg _ ->
+                    ), (AngelNumber()), errorHandler = (fun ex msg _ ->
                                                          printfn "[Error] Agent-AngelNumber received msg: %A \n Exception: %A" msg ex
                                                          match ex with
                                                          | AngelNumberReqStopException -> TerminateProcess
                                                          | _ -> Continue (AngelNumber())))
-    member self.Fetch(x) = counter.PostAndReply(fun replyChannel -> Fetch(x,replyChannel))
+    member self.Fetch(x) = angelNumber.PostAndReply(fun replyChannel -> Fetch(x,replyChannel))
